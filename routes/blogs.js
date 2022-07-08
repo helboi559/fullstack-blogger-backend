@@ -9,14 +9,18 @@ router.get('/hello-blogs', function(req, res, next) {
 });
 
 router.get('/all-blogs', async function(req, res, next) {
-  const sortOrder = req.query.sortOrder 
+  let sortOrder = req.query.sortOrder 
   if (sortOrder === 'ASC') {
     sortOrder = 1
   } else if (sortOrder === 'DESC') {
     sortOrder = -1
   }
   const sortField = req.query.sortField
-  
+  const sortObj = {}
+  //if they exist
+  if (sortField && sortOrder) {
+    sortObj = {[sortField]:sortOrder}
+  }
   const filterField = req.query.filterField 
   const filterValue = req.query.filterValue
   const filterObj = {}
@@ -24,8 +28,7 @@ router.get('/all-blogs', async function(req, res, next) {
   if(filterField && filterValue) {
     filterObj={[filterField]:filterValue}
   }
-  const sortObj = {}
-  // if (sortField)
+  
   const limit = Number(req.query.limit)
   const skip = Number(req.query.limit) * (Number(req.query.page) - 1)
   
@@ -33,7 +36,12 @@ router.get('/all-blogs', async function(req, res, next) {
     //changed from db.<name of collection>.doSomething() to db.collection('<name of collection>')
     
     const collection = await blogsDB().collection('posts2')
-    const posts2 = await collection.find({}).toArray()
+    const posts2 = await collection
+      .find(filterObj)
+      .sort(sortObj)
+      .limit(limit)
+      .skip(skip)
+      .toArray();
     
 
     // throw Error('Simulated Error') --necessary
