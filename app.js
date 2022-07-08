@@ -6,11 +6,12 @@ var logger = require('morgan');
 var cors = require('cors')
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-
-var app = express();
 var blogsRouter = require('./routes/blogs')
 var { mongoConnect } = require('./mongo.js');
 mongoConnect();
+
+var app = express();
+
 
 app.use(cors({origin:"http://localhost:3000"}));
 // view engine setup
