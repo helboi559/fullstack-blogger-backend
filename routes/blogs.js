@@ -9,34 +9,35 @@ router.get('/hello-blogs', function(req, res, next) {
 });
 
 router.get('/all-blogs', async function(req, res, next) {
-  let sortOrder = req.query.sortOrder 
-  if (sortOrder === 'ASC') {
-    sortOrder = 1
-  } else if (sortOrder === 'DESC') {
-    sortOrder = -1
-  }
-  const sortField = req.query.sortField
-  const sortObj = {}
-  //if they exist
-  if (sortField && sortOrder) {
-    sortObj = {[sortField]:sortOrder}
-  }
-  const filterField = req.query.filterField 
-  const filterValue = req.query.filterValue
-  const filterObj = {}
-  //if they exist
-  if(filterField && filterValue) {
-    filterObj={[filterField]:filterValue}
-  }
-  
-  const limit = Number(req.query.limit)
-  const skip = Number(req.query.limit) * (Number(req.query.page) - 1)
   
   try {
-    //changed from db.<name of collection>.doSomething() to db.collection('<name of collection>')
     
-    const collection = await blogsDB().collection('posts2')
-    const posts2 = await collection
+    let skip = Number(req.query.limit) * (Number(req.query.page) - 1)
+    let limit = Number(req.query.limit)
+    let sortOrder = req.query.sortOrder 
+    if (sortOrder === 'ASC') {
+      sortOrder = 1
+    } else if (sortOrder === 'DESC') {
+      sortOrder = -1
+    }
+    let filterField = req.query.filterField 
+    let filterValue = req.query.filterValue
+    let sortField = req.query.sortField
+     //changed from db.<name of collection>.doSomething() to db.collection('<name of collection>')
+    let collection = await blogsDB().collection('posts2')
+    let sortObj = {}
+    //if they exist
+    if (sortField && sortOrder) {
+      sortObj = {[sortField]:sortOrder}
+    }
+    
+    let filterObj = {}
+    //if they exist
+    if(filterField && filterValue) {
+      filterObj={[filterField]:filterValue}
+    } 
+    
+    let posts2 = await collection
       .find(filterObj)
       .sort(sortObj)
       .limit(limit)
