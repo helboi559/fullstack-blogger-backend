@@ -85,6 +85,7 @@
     mongoConnect();
     ```
     > 
+  ### Setup Routing for Mongo
   * Add a new GET route "all-blogs" in ./routes/blogs.js
     * Implement the following functionality in the "all-blogs" route:
     * It should respond with a list of all the blogs currently stored in your blogs database as a JSON object.
@@ -107,7 +108,8 @@
     
     });
     ```
-## part 3b
+## Backend (part 3B)
+### Change get request to params
 
 * Implement the following in the Server
   * [Optional] Install nodemon on the server and add the custom dev command in the package.json
@@ -124,6 +126,21 @@
       * const sortOrder = req.query.sortOrder 
       * const filterField = req.query.filterField 
       * const filterValue = req.query.filterValue
+    ```js
+    //in try
+    let skip = Number(req.query.limit) * (Number(req.query.page) - 1)
+    let limit = Number(req.query.limit)
+    let sortOrder = req.query.sortOrder 
+    if (sortOrder === 'ASC') {
+      sortOrder = 1
+    } else if (sortOrder === 'DESC') {
+      sortOrder = -1
+    }
+    let filterField = req.query.filterField 
+    let filterValue = req.query.filterValue
+    let sortField = req.query.sortField
+    ```
+  ### Use params from client request to respond with message
     * Update the mongo query method to properly incorporate the above variables in the query.
       * let filterObj = {}
         if (filterField && filterValue) {
@@ -139,13 +156,47 @@
           .limit(limit)
           .skip(skip)
           .toArray();
+
       * Note: sortOrder may need to be converted from "ASC" and "DESC" to 1 and -1 respectively before the query is executed.
       * Note: The above code may have to be modified depending on your implementation of the "/blogs/all-blogs" route in the fullstack blogger project. But it should be very similar in functionality to the "/blogs/all" route in the ExpressJS example. 
+    ```js
+     //changed from db.<name of collection>.doSomething() to db.collection('<name of collection>')
+    try {
+      //...
+      let collection = await blogsDB().collection('posts2')
+      let sortObj = {}
+      //if they exist
+      if (sortField && sortOrder) {
+        sortObj = {[sortField]:sortOrder}
+      }
+      
+      let filterObj = {}
+      //if they exist
+      if(filterField && filterValue) {
+        filterObj={[filterField]:filterValue}
+      } 
+      
+      let posts2 = await collection
+        .find(filterObj)
+        .sort(sortObj)
+        .limit(limit)
+        .skip(skip)
+        .toArray();
+      
+
+      // throw Error('Simulated Error') --necessary
+      res.json({message:posts2,success:true})
+    }catch(e) {
+      console.log(e)
+      res.json({message:String(e),success:false})
+      // res.status(e).send('error fetching data ' + e)
+    }
+    ```
     * Note: The sorting, filter, limit and page functionality are now being handled by the database using the mongodb query. We will no longer need to use JS functions to implement this functionality on the blogs dataset anymore.
-    * Stretch Goal: Add server-side validation to the "/blogs/all-blogs" route to ensure the following before the mongo query is executed:
+    * HAVENT DONE Stretch Goal: Add server-side validation to the "/blogs/all-blogs" route to ensure the following before the mongo query is executed:
       * sortField, sortOrder, filterField and filterValue must have truthy values. I.E. they must not be null or an empty string.
       * limit and page must be integer values greater than 0.
-### Requirements (Fullstack Part 2 - POST Blog) 4A
+### Create a POST route in Mongo (Part 4A)
 * Implement the following in the Server
   * Create a new POST route "/blog-submit" and implement the following
     * Inside the route handler function, add the following variables to get the incoming values from the POST request body:
@@ -160,4 +211,35 @@
       * id {number}
       * lastModified {date}
     * Add a mongo insert method to save the new blogPost object in the database.
+    ```js
+    router.post('/blog-submit', async function(req, res, next) {
+      try {
+        const collection = await blogsDB().collection('posts2')
+        console.log(collection)
+        const posts2 = await collection.find({}).toArray()
+        const title = req.body.title
+        const text = req.body.text
+        const author = req.body.author
+        const now= new Date()
+        const newPost = {
+          title:title,
+          text:text,
+          author:author,
+          createdAt:now,
+          id:posts2.length += 1,
+          lastModified:now
+        }
+        //add post
+        const addPost = await collection.insertOne(newPost)
+        //test if messages are received
+        res.json({message:'success',response:addPost})
+      } catch (e){
+        <!-- console.log(e) -->
+        res.json({message:'failed',error:String(e)})
+      }
+      
+
+    });
+    ```
   * Note: Use ExpressJS Example "/blog-submit" route as reference.
+  * use POSTMAN to test backend functionality BEFORE moving to frontend
