@@ -145,3 +145,19 @@
     * Stretch Goal: Add server-side validation to the "/blogs/all-blogs" route to ensure the following before the mongo query is executed:
       * sortField, sortOrder, filterField and filterValue must have truthy values. I.E. they must not be null or an empty string.
       * limit and page must be integer values greater than 0.
+### Requirements (Fullstack Part 2 - POST Blog) 4A
+* Implement the following in the Server
+  * Create a new POST route "/blog-submit" and implement the following
+    * Inside the route handler function, add the following variables to get the incoming values from the POST request body:
+      * const title = req.body.title
+      * const text = req.body.text
+      * const author = req.body.author
+    * Create a new blogPost object with the following fields, some of which will need to be generated with each new post.
+      * title {string}
+      * text {string}
+      * author {string}
+      * createdAt {date}
+      * id {number}
+      * lastModified {date}
+    * Add a mongo insert method to save the new blogPost object in the database.
+  * Note: Use ExpressJS Example "/blog-submit" route as reference.

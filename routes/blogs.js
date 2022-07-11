@@ -55,28 +55,30 @@ router.get('/all-blogs', async function(req, res, next) {
   // console.log('posts2', posts2)
 });
 
-// router.get('/all-blogs', async function(req, res, next) {
-//   const limit = Number(req.query.limit)
-//   const skip = Number(req.query.limit) * (Number(req.query.page) - 1)
-//   const sortField = req.query.sortField
-//   const sortOrder = req.query.sortOrder 
-//   const filterField = req.query.filterField 
-//   const filterValue = req.query.filterValue
+router.post('/blog-submit', async function(req, res, next) {
+  try {
+    const collection = await blogsDB.collection('posts2')
+    const posts2 = await collection.find({}).toArray()
+    const title = req.body.title
+    const text = req.body.text
+    const author = req.body.author
+    const now= new Date()
+    const newPost = {
+      title:title,
+      text:text,
+      author:author,
+      createdAt:now,
+      id:posts2.length += 1,
+      lastModified:now
+    }
+    //add post
+    const addPost = await collection.insertOne(newPost)
+    res.json({message:'success'})
+  } catch (e){
+    res.json({message:'failed'})
+  }
   
-//   try {
-//     //changed from db.<name of collection>.doSomething() to db.collection('<name of collection>')
-//     const collection = await blogsDB().collection('posts2')
-//     const posts2 = await collection.find({}).toArray()
-    
 
-//     // throw Error('Simulated Error') --necessary
-//     res.json({message:posts2,success:true})
-//   }catch(e) {
-//     console.log(e)
-//     res.json({message:String(e),success:false})
-//     // res.status(e).send('error fetching data ' + e)
-//   }
-//   // console.log('posts2', posts2)
-// });
+});
 
 module.exports = router;
