@@ -57,7 +57,8 @@ router.get('/all-blogs', async function(req, res, next) {
 
 router.post('/blog-submit', async function(req, res, next) {
   try {
-    const collection = await blogsDB.collection('posts2')
+    const collection = await blogsDB().collection('posts2')
+    console.log(collection)
     const posts2 = await collection.find({}).toArray()
     const title = req.body.title
     const text = req.body.text
@@ -73,9 +74,10 @@ router.post('/blog-submit', async function(req, res, next) {
     }
     //add post
     const addPost = await collection.insertOne(newPost)
-    res.json({message:'success'})
+    res.json({message:'success',response:addPost})
   } catch (e){
-    res.json({message:'failed'})
+    console.log(e)
+    res.json({message:'failed',error:String(e)})
   }
   
 
