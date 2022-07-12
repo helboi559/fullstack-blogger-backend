@@ -193,7 +193,7 @@
     }
     ```
     * Note: The sorting, filter, limit and page functionality are now being handled by the database using the mongodb query. We will no longer need to use JS functions to implement this functionality on the blogs dataset anymore.
-    * HAVENT DONE Stretch Goal: Add server-side validation to the "/blogs/all-blogs" route to ensure the following before the mongo query is executed:
+    * HAVENT DONE Stretch Goal: Add server-side validation to the "/blogs/all-blogs" route to ensure the following before the mongo query is executed: 2:49 7/11.
       * sortField, sortOrder, filterField and filterValue must have truthy values. I.E. they must not be null or an empty string.
       * limit and page must be integer values greater than 0.
 ### Create a POST route in Mongo (Part 4A)
@@ -243,3 +243,60 @@
     ```
   * Note: Use ExpressJS Example "/blog-submit" route as reference.
   * use POSTMAN to test backend functionality BEFORE moving to frontend
+
+## Requirements Blog Post Manager ( PUT,DELETE- Server- Part 5A)
+* Goal: Create a blog post management Client-side screen that will:
+  * Display key blog post information for administrative purposes
+  * Allow an administrator to manage/edit blog post information
+  * Allow an administrator to delete blog posts
+
+* Implement the following Server-Side:
+  * Create a new route file ./routes/admin.js
+    * var express = require("express");
+      var router = express.Router();
+      const { blogsDB } = require("../mongo");
+  * Add the new route to express in ./app.js
+    * var adminRouter = require('./routes/admin');
+    * app.use('/admin', adminRouter);
+  * Implement three new admin routes in ./routes/admin.js
+    * GET "/admin/blog-list"
+      * This route should return an array of blog posts, but only with the following fields: [title, author, createdAt, lastModified]. 
+      * Hint: The mongodb method .projection({}) can be chained onto a .find({}) to retrieve only the specified fields from the database.
+      * Note: The idea here is to leave out fields the administrator does not need to see, such as text, in order to reduce the amount of data sent between the client and the server.
+    * PUT "/admin/edit-blog"
+      * This route should receive a post body (req.body) with the following shape:
+        * req.body = {
+          blogId: {number},
+          title: {string},
+          author: {string},
+          text: {string}
+        }
+      * Implement mongodb functionality to find a post by blogId and then update that post in the database with the new values from req.body.
+        * try {
+            const collection = await blogsDB().collection("posts")
+            const updatedPost = {
+                ...newPostData // This is where the new data from req.body will go 
+            }
+            await collection.updateOne({
+                id: blogId
+            },{
+                $set:{
+                    ...updatedPost
+                }
+            })
+        } catch (e) {
+            console.error(e)
+        }
+      * Note: The field lastModified should be set to the current date when you update the blog post. 
+    * DELETE "/admin/delete-blog/:blogId"
+      * This route should get the blogId to delete from the req.params
+      * Implement mongodb functionality to find a blog post by blogId and delete it
+        * try {
+            const collection = await blogsDB().collection("posts")
+            await collection.deleteOne({
+                id: blogId
+            })    
+        } catch (e) {
+            console.error(e)
+        }
+  * Note: Eventually, we will be protecting certain functionality, such as editing or deleting a blog, by only allowing privileged admin users to access it.

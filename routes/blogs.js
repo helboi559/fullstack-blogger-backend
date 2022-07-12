@@ -69,7 +69,7 @@ router.post('/blog-submit', async function(req, res, next) {
       text:text,
       author:author,
       createdAt:now,
-      id:posts2.length += 1,
+      id:Number(posts2.length += 1),
       lastModified:now
     }
     //add post
