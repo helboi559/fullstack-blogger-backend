@@ -261,7 +261,7 @@
   * Implement three new admin routes in ./routes/admin.js
     * GET "/admin/blog-list"
       * This route should return an array of blog posts, but only with the following fields: [title, author, createdAt, lastModified]. 
-      * Hint: The mongodb method .projection({}) can be chained onto a .find({}) to retrieve only the specified fields from the database.
+      * Hint: The mongodb method .project({}) can be chained onto a .find({}) to retrieve only the specified fields from the database.
       * Note: The idea here is to leave out fields the administrator does not need to see, such as text, in order to reduce the amount of data sent between the client and the server.
     * PUT "/admin/edit-blog"
       * This route should receive a post body (req.body) with the following shape:
