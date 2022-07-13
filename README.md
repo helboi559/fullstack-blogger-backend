@@ -249,6 +249,7 @@
   * Display key blog post information for administrative purposes
   * Allow an administrator to manage/edit blog post information
   * Allow an administrator to delete blog posts
+  * Use PostMan to test
 
 * Implement the following Server-Side:
   * Create a new route file ./routes/admin.js
@@ -260,17 +261,26 @@
     * app.use('/admin', adminRouter);
   * Implement three new admin routes in ./routes/admin.js
     * GET "/admin/blog-list"
-      * This route should return an array of blog posts, but only with the following fields: [title, author, createdAt, lastModified]. 
-      * Hint: The mongodb method .project({}) can be chained onto a .find({}) to retrieve only the specified fields from the database.
+      * This route should return an array of blog posts, but only with the following fields: [title, author, createdAt, lastModified]. Send pertinent info to limit info clog. only if necessary.
+      * The mongodb method .project({}) can be chained onto a .find({}) to retrieve only the specified fields from the database.
       * Note: The idea here is to leave out fields the administrator does not need to see, such as text, in order to reduce the amount of data sent between the client and the server.
+      ```js
+      router.get("/blog-list",async function(req,res,next){
+
+      try {
+          const collection = await blogsDB().collection('posts2')
+          // 0 is to 'exclude" 1 is to "include"
+          const posts2 = await collection.find({}).project({text:0,_id:0,category:0}).toArray()
+          res.json({message:posts2, response:true})
+      }  catch(e) {
+          // res.status(500)
+          console.log(e)
+          res.json({message:String(e)})
+      } 
+      ```
     * PUT "/admin/edit-blog"
       * This route should receive a post body (req.body) with the following shape:
-        * req.body = {
-          blogId: {number},
-          title: {string},
-          author: {string},
-          text: {string}
-        }
+      
       * Implement mongodb functionality to find a post by blogId and then update that post in the database with the new values from req.body.
         * try {
             const collection = await blogsDB().collection("posts")
@@ -288,6 +298,27 @@
             console.error(e)
         }
       * Note: The field lastModified should be set to the current date when you update the blog post. 
+      ```js
+        router.put("/edit-blog", async function(req,res,next) {
+      
+        try {
+            const collection = await blogsDB().collection('posts2')
+            const blogId = Number(req.body.blogId)
+            const updatePost = {
+                id:blogId,
+                title:req.body.title,
+                author:req.body.author,
+                text:req.body.text,
+            }
+            // updated last modified with $currentDate no key needed
+            const updatedPost = await collection.updateOne({id:blogId},{$set:updatePost,$currentDate: { lastModified: true }})
+            
+            res.json({message:"changed post!",status:updatedPost})
+        }catch (e) {
+            res.json({message:String(e),status:false})
+        }
+      })
+      ```
     * DELETE "/admin/delete-blog/:blogId"
       * This route should get the blogId to delete from the req.params
       * Implement mongodb functionality to find a blog post by blogId and delete it
@@ -299,4 +330,19 @@
         } catch (e) {
             console.error(e)
         }
+
+      ```js
+        router.delete("/delete-blog/:blogId", async function(req,res) {
+          
+          try {
+              //info coming in from client .../admin/:blogId
+              let blogId = Number(req.params.blogId)
+              const collection = await blogsDB().collection('posts2')
+              const posts2 = await collection.deleteOne({id:blogId})
+              res.json({message:'deleted blog!'})
+          }catch(e) {
+              res.json({message:String(e)})
+          }
+      })
+      ```
   * Note: Eventually, we will be protecting certain functionality, such as editing or deleting a blog, by only allowing privileged admin users to access it.
