@@ -22,17 +22,17 @@ router.put("/edit-blog", async function(req,res,next) {
     
     try {
         const collection = await blogsDB().collection('posts2')
-        
+        const blogId = Number(req.body.blogId)
         const updatePost = {
-            blogId:Number(req.body.blogId),
+            id:blogId,
             title:req.body.title,
             author:req.body.author,
             text:req.body.text,
         }
         // console.log(updatePost)
-        const posts2 = await collection.updateOne({id:blogId},{$set:{updatePost},$currentDate: { lastModified: true }}).toArray()
-        // console.log(posts2)
-        res.json({message:"changed post!",status:true})
+        const updatedPost = await collection.updateOne({id:blogId},{$set:updatePost,$currentDate: { lastModified: true }})
+        
+        res.json({message:"changed post!",status:updatedPost})
     }catch (e) {
         res.json({message:String(e),status:false})
     }
