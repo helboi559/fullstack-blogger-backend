@@ -83,4 +83,14 @@ router.post('/blog-submit', async function(req, res, next) {
 
 });
 
+router.get("/single-blog/:blogId", async function(req,res){
+  try {
+    const blogId = Number(req.params.blogId)
+    const collection = await blogsDB().collection('posts2')
+    const blogPost = await collection.findOne({id:blogId})
+    res.json({payload:blogPost, message:true})
+  }catch(e) {
+    res.json({message:false,details:String(e)})
+  }
+})
 module.exports = router;

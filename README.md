@@ -346,3 +346,16 @@
       })
       ```
   * Note: Eventually, we will be protecting certain functionality, such as editing or deleting a blog, by only allowing privileged admin users to access it.
+
+## Requirements (Fullstack Part 6A - Blog Post Manager - Modal)
+
+* Note: Our approach for this part of the Fullstack blogger is to implement the ability for an admin to edit blogs along with deleting them. We will add a new component called a Modal to our app. Then we will add a button to the <BlogManagerCard /> to open the Modal and at the same time, fetch blog data for a single blog for the Modal. We will then implement functionality to edit a single blog post in our Modal and send that updated blog data back to the server to be saved in the database.
+
+* Implement the following Server-Side:
+  * Add a new route GET "/blogs/single-blog/:blogId 
+    * This route should receive a blogId as a urlParam and respond with the blog post whose id === blogId
+      * const blogId = Number(req.params.blogId);
+        const collection = await blogsDB().collection("posts")
+        const blogPost = await collection.findOne({id: blogId})
+        res.json(blogPost)
+
